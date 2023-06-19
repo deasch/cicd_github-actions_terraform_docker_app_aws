@@ -142,7 +142,7 @@ resource "aws_instance" "sandbox_ec2_instance" {
   subnet_id              = aws_subnet.aws_sandbox_subnet.id
   key_name               = "aws_sandbox_keypair"
   vpc_security_group_ids = [aws_security_group.aws_sandbox_sg.id]
-  user_data = "${file("${path.module}/userdata_webserver.sh")}"
+  user_data = "${file("${path.module}/userdata_install-docker.sh")}"
   tags = {
     Name        = "sandbox_ec2_instance"
     Environment = "aws_sandbox"

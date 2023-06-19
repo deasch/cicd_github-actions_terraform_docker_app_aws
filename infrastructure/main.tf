@@ -106,11 +106,10 @@ resource "aws_subnet" "aws_sandbox_subnet" {
 # ========== NETWORKING - GATEWAYS
 # ===== INTERNET GATEWAY
 # Internet Gateway
-resource "aws_internet_gateway" "demo_gateway" {
-  vpc_id = aws_vpc.demo_vpc.id
-
+resource "aws_internet_gateway" "aws_sandbox_igw" {
+  vpc_id = aws_vpc.aws_sandbox_vpc.id
   tags = {
-    Name        = "${var.name}-igw"
+    Name        = "aws_sandbox_igw"
     Environment = "aws_sandbox"
   }
 }
@@ -119,24 +118,22 @@ resource "aws_internet_gateway" "demo_gateway" {
 # ========== NETWORKING - ROUTING TABLES
 # ===== ROUTE TABLE
 # AWS Route Table
-resource "aws_route_table" "demo_route_table" {
-  vpc_id = aws_vpc.demo_vpc.id
-
+resource "aws_route_table" "aws_sandbox_routetable" {
+  vpc_id = aws_vpc.aws_sandbox_vpc.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.demo_gateway.id
+    gateway_id = aws_internet_gateway.aws_sandbox_igw.id
   }
-
   tags = {
-    Name        = "${var.name}-route"
+    Name        = "aws_sandbox_routetable"
     Environment = "aws_sandbox"
   }
 }
 # ===== ROUTE TABLE ASSOCIATION
 # Associate public subnet to route table
 resource "aws_route_table_association" "demo_association" {
-  subnet_id      = aws_subnet.demo_subnet.id
-  route_table_id = aws_route_table.demo_route_table.id
+  subnet_id      = aws_subnet.aws_sandbox_subnet.id
+  route_table_id = aws_route_table.aws_sandbox_routetable.id
 }
 
 
@@ -146,22 +143,22 @@ resource "aws_route_table_association" "demo_association" {
 terraform {
   backend "s3" {
     bucket = "tf-state-dhsoni"
-    region = "us-west-2"
+    region = "eu-central-1"
     key    = "terraform.tfstate"
   }
 }
 # ===== EC2 INSTANCE
-resource "aws_instance" "demo_instance" {
+resource "aws_instance" "sandbox_ec2_instance" {
 
-  ami                    = var.ami_id
-  instance_type          = var.instance_type
+  ami                    = "ami-0b2ac948e23c57071"
+  instance_type          = "t2.micro"
   availability_zone      = data.aws_availability_zones.az.names[0]
-  subnet_id              = aws_subnet.demo_subnet.id
-  key_name               = aws_key_pair.demokey.id
-  vpc_security_group_ids = [aws_security_group.demosg.id]
+  subnet_id              = aws_subnet.aws_sandbox_subnet.id
+  key_name               = aws_key_pair.aws_sandbox_keypair.id
+  vpc_security_group_ids = [aws_security_group.aws_sandbox_sg.id]
 
   tags = {
-    Name        = "${var.name}-instance"
+    Name        = "sandbox_ec2_instance"
     Environment = "aws_sandbox"
   }
 
@@ -178,7 +175,7 @@ resource "aws_instance" "demo_instance" {
 
   }
 
-  # Installing splunk & creating distributed indexer clustering on newly created instance
+  # Installing docker
   provisioner "remote-exec" {
     inline = [
       "sudo yum update -y",

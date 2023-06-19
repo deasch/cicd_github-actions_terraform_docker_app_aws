@@ -1,0 +1,74 @@
+name: 'Terraform - AWS Sandbox'
+
+on:
+  push:
+    branches:
+    - main
+    paths:
+        - infrastructure/**
+        
+  pull_request:
+    branches:
+    - main
+    paths:
+        - infrastructure/**
+
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  
+
+jobs:
+  build_infrastructure:
+    name: Build Infrastructure - Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.5.2
+        
+        
+      - name: Configure AWS Credentials Action For GitHub Actions
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+
+      - name: Setup Terraform CLI
+        uses: hashicorp/setup-terraform@v2.0.2
+
+
+      - name: Terraform init
+        run: |
+          echo `pwd`
+          echo "** Running Terraform Init**"
+          terraform init
+        working-directory: 'infrastructure'
+
+
+      - name: Terraform validate
+        run: |
+          echo `pwd`
+          echo "** Running Terraform Validate**"
+          terraform validate
+        working-directory: 'infrastructure'
+
+
+      - name: Terraform plan
+        run: |
+          echo `pwd`
+          echo "tfpath ${{ github.event.inputs.tfpath }}"        
+          echo "** Running Terraform Plan**"
+          terraform plan
+        working-directory: 'infrastructure'
+      
+     
+      - name: Terraform apply
+        run: |
+          echo `pwd`
+          echo "tfpath ${{ github.event.inputs.tfpath }}"        
+          echo "** Running Terraform Apply**"
+          terraform apply -auto-approve
+        working-directory: 'infrastructure'

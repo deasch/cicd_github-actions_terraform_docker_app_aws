@@ -70,14 +70,7 @@ data "aws_availability_zones" "az" {}
 
 # ========== IAM
 # ===== KEY PAIR
-resource "aws_key_pair" "aws_sandbox_keypair" {
-  key_name   = "aws_sandbox_keypair"
-  public_key = file(var.public_key)
-  tags = {
-    Name        = "aws_sandbox_keypair"
-    Environment = "aws_sandbox"
-  }
-}
+# aws_sandbox_keypair
 
 
 # ========== NETWORKING - VPC
@@ -192,7 +185,7 @@ resource "aws_instance" "sandbox_ec2_instance" {
   instance_type          = "t2.micro"
   availability_zone      = data.aws_availability_zones.az.names[0]
   subnet_id              = aws_subnet.aws_sandbox_subnet.id
-  key_name               = aws_key_pair.aws_sandbox_keypair.id
+  key_name               = "aws_sandbox_keypair"
   vpc_security_group_ids = [aws_security_group.aws_sandbox_sg.id]
 
   tags = {

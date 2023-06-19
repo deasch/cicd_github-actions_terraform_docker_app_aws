@@ -3,6 +3,50 @@ variable "repo_version"{
 }
 
 
+
+
+
+# CIDR Block for VPC
+variable "cidr_block" {}
+
+# Instance Tenancy 
+variable "tenancy" {}
+
+# Subnet CIDR
+variable "cidr_block_subnet" {}
+
+# Tags
+variable "name" {}
+
+# Region
+variable "region" {}
+
+# AMI ID
+variable "ami_id" {}
+
+# Instance Type
+variable "instance_type" {}
+
+# Defining Public Key
+variable "public_key" {
+  default = "tests.pub"
+}
+
+# Defining Private Key
+variable "private_key" {
+  default = "tests.pem"
+}
+
+# Definign Key Name for connection
+variable "key_name" {
+  default     = "tests"
+  description = "Desired name of AWS key pair"
+}
+
+
+
+
+
 terraform {
   required_providers {
     aws = {
@@ -142,7 +186,7 @@ resource "aws_route_table_association" "demo_association" {
 # Storing state file on S3 backend
 terraform {
   backend "s3" {
-    bucket = "tf-state-dhsoni"
+    bucket = "tf-state-aws_sandbox"
     region = "eu-central-1"
     key    = "terraform.tfstate"
   }
@@ -179,69 +223,14 @@ resource "aws_instance" "sandbox_ec2_instance" {
   provisioner "remote-exec" {
     inline = [
       "sudo yum update -y",
-      "sudo amazon-linux-extras install docker -y",
-      "sudo service docker start",
+      "sudo yum upgrade",
+      "sudo dnf install docker -y",
+      "sudo systemctl enable docker",
+      "sudo systemctl start docker",
       "sudo usermod -a -G docker ec2-user",
       "sudo chkconfig docker on",
-      "sudo yum install -y git",
-      "sudo chmod 666 /var/run/docker.sock",
-      "docker pull dhruvin30/dhsoniweb:v1",
-      "docker run -d -p 80:80 dhruvin30/dhsoniweb:v1"
+      "sudo systemctl restart docker"
     ]
   }
 
 }
-
-
-
-
-
-
-
-
-
-# CIDR Block for VPC
-variable "cidr_block" {}
-
-# Instance Tenancy 
-variable "tenancy" {}
-
-# Subnet CIDR
-variable "cidr_block_subnet" {}
-
-# Tags
-variable "name" {}
-
-# Region
-variable "region" {}
-
-# AMI ID
-variable "ami_id" {}
-
-# Instance Type
-variable "instance_type" {}
-
-# Defining Public Key
-variable "public_key" {
-  default = "tests.pub"
-}
-
-# Defining Private Key
-variable "private_key" {
-  default = "tests.pem"
-}
-
-# Definign Key Name for connection
-variable "key_name" {
-  default     = "tests"
-  description = "Desired name of AWS key pair"
-}
-
-
-
-
-
-
-
-
-

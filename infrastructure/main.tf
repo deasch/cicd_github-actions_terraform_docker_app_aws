@@ -183,14 +183,8 @@ resource "aws_route_table_association" "demo_association" {
 
 # ========== COMPUTE
 # ===== S3 BUCKET
-# Storing state file on S3 backend
-terraform {
-  backend "s3" {
-    bucket = "tf-state-aws_sandbox"
-    region = "eu-central-1"
-    key    = "terraform.tfstate"
-  }
-}
+
+
 # ===== EC2 INSTANCE
 resource "aws_instance" "sandbox_ec2_instance" {
 

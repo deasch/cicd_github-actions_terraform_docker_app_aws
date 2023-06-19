@@ -76,8 +76,7 @@ data "aws_availability_zones" "az" {}
 # ========== NETWORKING - VPC
 # ===== VPC
 resource "aws_vpc" "aws_sandbox_vpc" {
-  cidr_block           = "20.0.0.0/16"
-  instance_tenancy     = var.tenancy
+  cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
   tags = {
     Name        = "aws_sandbox_vpc"
@@ -130,7 +129,7 @@ resource "aws_security_group" "aws_sandbox_sg" {
 # AWS Subnet
 resource "aws_subnet" "aws_sandbox_subnet" {
   vpc_id                  = aws_vpc.aws_sandbox_vpc.id
-  cidr_block              = "20.0.1.0/24"
+  cidr_block              = "10.0.1.0/24"
   availability_zone       = "eu-central-1a"
   map_public_ip_on_launch = true
   tags = {
@@ -198,7 +197,7 @@ resource "aws_instance" "sandbox_ec2_instance" {
     # The default username for our AMI
     user = "ec2-user"
     # Private key for connection
-    private_key = file(var.private_key)
+    private_key = ${secret.AWS_PRIVATE_KEY}
     # Type of connection
     type = "ssh"
     # Host

@@ -40,7 +40,8 @@ resource "aws_vpc" "demo_vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    "Name" = "${var.name}-vpc"
+    Name        = "${var.name}-vpc"
+    Environment = "aws_sandbox"
   }
 }
 # ===== SECURITY GROUP
@@ -94,7 +95,8 @@ resource "aws_subnet" "demo_subnet" {
   map_public_ip_on_launch = true
 
   tags = {
-    "Name" = "${var.name}-subnet"
+    Name        = "${var.name}-subnet"
+    Environment = "aws_sandbox"
   }
 }
 
@@ -106,7 +108,8 @@ resource "aws_internet_gateway" "demo_gateway" {
   vpc_id = aws_vpc.demo_vpc.id
 
   tags = {
-    "Name" = "${var.name}-igw"
+    Name        = "${var.name}-igw"
+    Environment = "aws_sandbox"
   }
 }
 
@@ -123,7 +126,8 @@ resource "aws_route_table" "demo_route_table" {
   }
 
   tags = {
-    "Name" = "${var.name}-route"
+    Name        = "${var.name}-route"
+    Environment = "aws_sandbox"
   }
 }
 # ===== ROUTE TABLE ASSOCIATION
@@ -155,7 +159,8 @@ resource "aws_instance" "demo_instance" {
   vpc_security_group_ids = [aws_security_group.demosg.id]
 
   tags = {
-    "Name" = "${var.name}-instance"
+    Name        = "${var.name}-instance"
+    Environment = "aws_sandbox"
   }
 
   # SSH into instance 

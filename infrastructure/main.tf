@@ -1,21 +1,27 @@
-# Provider name
-provider "aws" {
-  region = var.region
+variable "repo_version"{
+  default = "v0.0.0.1"
 }
 
-# Storing state file on S3 backend
+
 terraform {
-  backend "s3" {
-    bucket = "tf-state-dhsoni"
-    region = "us-west-2"
-    key    = "terraform.tfstate"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
   }
 }
 
 
+# ========== PROVIDER
+# ===== AWS
+provider "aws" {
+  region = "eu-central-1"
+}
 
 
-# AWS VPC
+# ========== NETWORKING - VPC
+# ===== VPC
 resource "aws_vpc" "demo_vpc" {
   cidr_block           = var.cidr_block
   instance_tenancy     = var.tenancy
@@ -25,52 +31,7 @@ resource "aws_vpc" "demo_vpc" {
     "Name" = "${var.name}-vpc"
   }
 }
-
-# Internet Gateway
-resource "aws_internet_gateway" "demo_gateway" {
-  vpc_id = aws_vpc.demo_vpc.id
-
-  tags = {
-    "Name" = "${var.name}-igw"
-  }
-}
-
-# AZ
-data "aws_availability_zones" "az" {}
-
-# AWS Subnet
-resource "aws_subnet" "demo_subnet" {
-  vpc_id                  = aws_vpc.demo_vpc.id
-  cidr_block              = var.cidr_block_subnet
-  availability_zone       = data.aws_availability_zones.az.names[0]
-  map_public_ip_on_launch = true
-
-  tags = {
-    "Name" = "${var.name}-subnet"
-  }
-}
-
-# AWS Route Table
-resource "aws_route_table" "demo_route_table" {
-  vpc_id = aws_vpc.demo_vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.demo_gateway.id
-  }
-
-  tags = {
-    "Name" = "${var.name}-route"
-  }
-}
-
-# Associate public subnet to route table
-resource "aws_route_table_association" "demo_association" {
-  subnet_id      = aws_subnet.demo_subnet.id
-  route_table_id = aws_route_table.demo_route_table.id
-}
-
-# Creating Security Group
+# ===== SECURITY GROUP
 resource "aws_security_group" "demosg" {
   name        = "Demo Security Group"
   vpc_id      = aws_vpc.demo_vpc.id
@@ -109,6 +70,95 @@ resource "aws_security_group" "demosg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+
+# ========== NETWORKING - SUBNETS
+# ===== SUBNET
+# AWS Subnet
+resource "aws_subnet" "demo_subnet" {
+  vpc_id                  = aws_vpc.demo_vpc.id
+  cidr_block              = var.cidr_block_subnet
+  availability_zone       = data.aws_availability_zones.az.names[0]
+  map_public_ip_on_launch = true
+
+  tags = {
+    "Name" = "${var.name}-subnet"
+  }
+}
+
+
+# ========== NETWORKING - GATEWAYS
+# ===== INTERNET GATEWAY
+# Internet Gateway
+resource "aws_internet_gateway" "demo_gateway" {
+  vpc_id = aws_vpc.demo_vpc.id
+
+  tags = {
+    "Name" = "${var.name}-igw"
+  }
+}
+
+
+# ========== NETWORKING - ROUTING TABLES
+# ===== ROUTE TABLE
+# AWS Route Table
+resource "aws_route_table" "demo_route_table" {
+  vpc_id = aws_vpc.demo_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.demo_gateway.id
+  }
+
+  tags = {
+    "Name" = "${var.name}-route"
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Storing state file on S3 backend
+terraform {
+  backend "s3" {
+    bucket = "tf-state-dhsoni"
+    region = "us-west-2"
+    key    = "terraform.tfstate"
+  }
+}
+
+
+
+
+
+
+
+
+# AZ
+data "aws_availability_zones" "az" {}
+
+
+
+
+
+# Associate public subnet to route table
+resource "aws_route_table_association" "demo_association" {
+  subnet_id      = aws_subnet.demo_subnet.id
+  route_table_id = aws_route_table.demo_route_table.id
+}
+
+
 
 # Creating key pair
 resource "aws_key_pair" "demokey" {

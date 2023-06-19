@@ -26,28 +26,31 @@ data "aws_availability_zones" "az" {}
 
 # ========== IAM
 # ===== KEY PAIR
-resource "aws_key_pair" "demokey" {
-  key_name   = var.key_name
+resource "aws_key_pair" "aws_sandbox_keypair" {
+  key_name   = "aws_sandbox_keypair"
   public_key = file(var.public_key)
+  tags = {
+    Name        = "aws_sandbox_keypair"
+    Environment = "aws_sandbox"
+  }
 }
 
 
 # ========== NETWORKING - VPC
 # ===== VPC
-resource "aws_vpc" "demo_vpc" {
-  cidr_block           = var.cidr_block
+resource "aws_vpc" "aws_sandbox_vpc" {
+  cidr_block           = "20.0.0.0/16"
   instance_tenancy     = var.tenancy
   enable_dns_hostnames = true
-
   tags = {
-    Name        = "${var.name}-vpc"
+    Name        = "aws_sandbox_vpc"
     Environment = "aws_sandbox"
   }
 }
 # ===== SECURITY GROUP
-resource "aws_security_group" "demosg" {
-  name        = "Demo Security Group"
-  vpc_id      = aws_vpc.demo_vpc.id
+resource "aws_security_group" "aws_sandbox_sg" {
+  name        = "aws_sandbox_sg"
+  vpc_id      = aws_vpc.aws_sandbox_vpc.id
 
   # Inbound Rules
   # HTTP access from anywhere
@@ -88,14 +91,13 @@ resource "aws_security_group" "demosg" {
 # ========== NETWORKING - SUBNETS
 # ===== PUBLIC SUBNET
 # AWS Subnet
-resource "aws_subnet" "demo_subnet" {
-  vpc_id                  = aws_vpc.demo_vpc.id
-  cidr_block              = var.cidr_block_subnet
-  availability_zone       = data.aws_availability_zones.az.names[0]
+resource "aws_subnet" "aws_sandbox_subnet" {
+  vpc_id                  = aws_vpc.aws_sandbox_vpc.id
+  cidr_block              = "20.0.1.0/24"
+  availability_zone       = "eu-central-1a"
   map_public_ip_on_launch = true
-
   tags = {
-    Name        = "${var.name}-subnet"
+    Name        = "aws_sandbox_subnet"
     Environment = "aws_sandbox"
   }
 }

@@ -1,5 +1,5 @@
 variable "repo_version"{
-  default = "v0.0.0.1"
+  default = "v0.0.0.2"
 }
 
 

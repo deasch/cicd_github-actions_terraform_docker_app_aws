@@ -3,50 +3,6 @@ variable "repo_version"{
 }
 
 
-
-
-
-# CIDR Block for VPC
-variable "cidr_block" {}
-
-# Instance Tenancy 
-variable "tenancy" {}
-
-# Subnet CIDR
-variable "cidr_block_subnet" {}
-
-# Tags
-variable "name" {}
-
-# Region
-variable "region" {}
-
-# AMI ID
-variable "ami_id" {}
-
-# Instance Type
-variable "instance_type" {}
-
-# Defining Public Key
-variable "public_key" {
-  default = "tests.pub"
-}
-
-# Defining Private Key
-variable "private_key" {
-  default = "tests.pem"
-}
-
-# Definign Key Name for connection
-variable "key_name" {
-  default     = "tests"
-  description = "Desired name of AWS key pair"
-}
-
-
-
-
-
 terraform {
   required_providers {
     aws = {
@@ -186,37 +142,10 @@ resource "aws_instance" "sandbox_ec2_instance" {
   subnet_id              = aws_subnet.aws_sandbox_subnet.id
   key_name               = "aws_sandbox_keypair"
   vpc_security_group_ids = [aws_security_group.aws_sandbox_sg.id]
-
+  user_data = "${file("${path.module}/userdata_webserver.sh")}"
   tags = {
     Name        = "sandbox_ec2_instance"
     Environment = "aws_sandbox"
-  }
-
-  # SSH into instance 
-  connection {
-    # The default username for our AMI
-    user = "ec2-user"
-    # Private key for connection
-    private_key = ${secret.AWS_PRIVATE_KEY}
-    # Type of connection
-    type = "ssh"
-    # Host
-    host = self.public_ip
-
-  }
-
-  # Installing docker
-  provisioner "remote-exec" {
-    inline = [
-      "sudo yum update -y",
-      "sudo yum upgrade",
-      "sudo dnf install docker -y",
-      "sudo systemctl enable docker",
-      "sudo systemctl start docker",
-      "sudo usermod -a -G docker ec2-user",
-      "sudo chkconfig docker on",
-      "sudo systemctl restart docker"
-    ]
   }
 
 }
